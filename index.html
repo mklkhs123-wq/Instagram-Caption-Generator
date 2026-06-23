@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instagram Caption Generator - TechPatraa</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+    --card: rgba(255,255,255,0.07);
+    --card-border: rgba(255,255,255,0.12);
+    --green: #1D9E75;
+    --green-dark: #0F6E56;
+    --green-light: #25c98f;
+    --text: #e8edf5;
+    --muted: #8fa3b8;
+    --input-bg: rgba(255,255,255,0.06);
+    --input-border: rgba(255,255,255,0.15);
+    --accent: #f0c04a;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    color: var(--text);
+    padding: 0 0 60px;
+  }
+
+  /* ─── HEADER ─── */
+  .tp-header {
+    background: rgba(13,22,37,0.85);
+    border-bottom: 1px solid rgba(29,158,117,0.3);
+    padding: 16px 20px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .tp-header .logo { font-size: 1.3rem; font-weight: 800; color: var(--green-light); letter-spacing: -0.5px; }
+  .tp-header .tagline { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+  /* ─── AD BANNER ─── */
+  .ad-wrap {
+    display: flex; justify-content: center;
+    padding: 12px 16px;
+    background: rgba(0,0,0,0.2);
+  }
+  .ad-label { font-size: 0.62rem; color: var(--muted); text-align: center; margin-bottom: 4px; }
+
+  /* ─── HERO ─── */
+  .hero {
+    text-align: center;
+    padding: 40px 20px 20px;
+  }
+  .hero-icon {
+    width: 68px; height: 68px;
+    background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+    border-radius: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 2rem; margin-bottom: 16px;
+    box-shadow: 0 8px 32px rgba(131,58,180,0.4);
+  }
+  .hero h1 { font-size: 1.9rem; font-weight: 800; line-height: 1.2; }
+  .hero h1 span { background: linear-gradient(90deg, #833ab4, #fd1d1d, #fcb045); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero p { color: var(--muted); font-size: 0.9rem; margin-top: 10px; max-width: 480px; margin-inline: auto; }
+
+  /* ─── MAIN LAYOUT ─── */
+  .container { max-width: 900px; margin: 0 auto; padding: 0 16px; }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(8px);
+  }
+  .card-title {
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--green-light);
+    margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+  }
+  .card-title::before { content:''; width:3px; height:14px; background: var(--green); border-radius:2px; }
+
+  /* ─── FORM ELEMENTS ─── */
+  label { font-size: 0.8rem; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px; }
+  .sublabel { font-size: 0.72rem; color: var(--muted); font-weight: 400; margin-left: 4px; }
+
+  textarea, input[type="text"], select {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    resize: vertical;
+  }
+  textarea:focus, input[type="text"]:focus, select:focus {
+    border-color: var(--green);
+    background: rgba(29,158,117,0.08);
+  }
+  select option { background: #1a2a3a; color: var(--text); }
+  .char-count { text-align: right; font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .field { margin-bottom: 16px; }
+
+  /* ─── TOGGLE CHIPS ─── */
+  .chips-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 500;
+    border: 1px solid var(--input-border); background: var(--input-bg);
+    color: var(--muted); cursor: pointer; transition: all 0.18s; user-select: none;
+  }
+  .chip:hover { border-color: var(--green); color: var(--green-light); }
+  .chip.active { background: linear-gradient(135deg, var(--green-dark), var(--green)); border-color: var(--green); color: #fff; }
+
+  /* ─── EMOJI PICKER STRIP ─── */
+  .emoji-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .emoji-btn {
+    width: 34px; height: 34px; border-radius: 8px; font-size: 1.1rem;
+    background: var(--input-bg); border: 1px solid var(--input-border);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .emoji-btn:hover { background: rgba(29,158,117,0.2); border-color: var(--green); transform: scale(1.15); }
+
+  /* ─── RANGE SLIDER ─── */
+  input[type="range"] {
+    width: 100%; accent-color: var(--green);
+    height: 4px; border-radius: 4px;
+    background: var(--input-border);
+    cursor: pointer;
+  }
+  .range-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+
+  /* ─── GENERATE BUTTON ─── */
+  .btn-generate {
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, var(--green-dark), var(--green));
+    border: none; border-radius: 12px;
+    color: #fff; font-size: 1rem; font-weight: 700;
+    cursor: pointer; letter-spacing: 0.02em;
+    transition: opacity 0.2s, transform 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin-top: 8px;
+  }
+  .btn-generate:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-generate:active { transform: translateY(0); }
+  .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ─── RESULTS ─── */
+  #results-section { display: none; }
+  .results-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+  }
+  .results-title { font-size: 1.1rem; font-weight: 700; }
+  .results-meta { font-size: 0.75rem; color: var(--muted); }
+
+  .caption-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 14px;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .caption-card:hover { border-color: rgba(29,158,117,0.4); }
+
+  .caption-badge {
+    display: inline-block; padding: 3px 10px; border-radius: 20px;
+    font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .badge-trending { background: rgba(131,58,180,0.25); color: #c084fc; border: 1px solid rgba(131,58,180,0.3); }
+  .badge-viral { background: rgba(253,29,29,0.2); color: #f87171; border: 1px solid rgba(253,29,29,0.25); }
+  .badge-story { background: rgba(252,176,69,0.2); color: #fbbf24; border: 1px solid rgba(252,176,69,0.25); }
+  .badge-professional { background: rgba(29,158,117,0.2); color: var(--green-light); border: 1px solid rgba(29,158,117,0.3); }
+  .badge-minimal { background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid rgba(148,163,184,0.2); }
+  .badge-emotional { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+
+  .caption-text {
+    font-size: 0.9rem; line-height: 1.7; color: var(--text);
+    white-space: pre-wrap; word-break: break-word;
+  }
+  .caption-actions {
+    display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+  }
+  .btn-sm {
+    padding: 7px 14px; border-radius: 8px; font-size: 0.75rem; font-weight: 600;
+    border: 1px solid var(--input-border); background: var(--input-bg);
+    color: var(--text); cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .btn-sm:hover { background: rgba(29,158,117,0.2); border-color: var(--green); color: var(--green-light); }
+  .btn-sm.copied { background: rgba(29,158,117,0.3); border-color: var(--green); color: #fff; }
+
+  .hashtag-block {
+    margin-top: 12px; padding: 12px; border-radius: 8px;
+    background: rgba(0,0,0,0.2); font-size: 0.78rem;
+    color: #60a5fa; line-height: 1.8; word-break: break-word;
+  }
+
+  /* ─── STATS BAR ─── */
+  .stats-bar {
+    display: flex; gap: 12px; flex-wrap: wrap; margin-top: 14px;
+  }
+  .stat-pill {
+    background: rgba(255,255,255,0.06); border: 1px solid var(--card-border);
+    border-radius: 8px; padding: 8px 14px; font-size: 0.75rem;
+    display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; min-width: 80px;
+  }
+  .stat-pill .val { font-size: 1rem; font-weight: 700; color: var(--green-light); }
+  .stat-pill .lbl { color: var(--muted); font-size: 0.65rem; }
+
+  /* ─── TIPS ─── */
+  .tip-box {
+    background: rgba(29,158,117,0.08); border: 1px solid rgba(29,158,117,0.2);
+    border-radius: 10px; padding: 14px; font-size: 0.8rem; color: var(--muted);
+    line-height: 1.6;
+  }
+  .tip-box strong { color: var(--green-light); }
+
+  /* ─── HISTORY ─── */
+  .history-item {
+    padding: 10px 14px; background: var(--input-bg);
+    border: 1px solid var(--input-border); border-radius: 8px;
+    font-size: 0.8rem; cursor: pointer; transition: border-color 0.15s;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .history-item:hover { border-color: var(--green); }
+  .history-preview { color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 10px; }
+  .history-time { color: var(--muted); font-size: 0.68rem; white-space: nowrap; }
+
+  /* ─── LOADER ─── */
+  .loader { display: none; flex-direction: column; align-items: center; padding: 40px; gap: 14px; }
+  .loader.active { display: flex; }
+  .spinner { width: 40px; height: 40px; border: 3px solid rgba(29,158,117,0.2); border-top-color: var(--green); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader-text { color: var(--muted); font-size: 0.85rem; }
+
+  /* ─── FOOTER ─── */
+  .tp-footer { text-align: center; padding: 30px 20px 10px; color: var(--muted); font-size: 0.75rem; }
+  .tp-footer a { color: var(--green-light); text-decoration: none; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.5rem; }
+    .card { padding: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="tp-header">
+  <div class="logo">⚡ TechPatraa</div>
+  <div class="tagline">Free Tech Tools for Everyone</div>
+</header>
+
+<!-- TOP AD -->
+<div class="ad-wrap">
+  <div>
+    <div class="ad-label">Advertisement</div>
+    <!-- highperformanceformat.com Ad -->
+    <script type='text/javascript'>
+      atOptions = {
+        'key' : '40481fbfeb3ccbe3f4d81eba78ba36e8',
+        'format' : 'iframe',
+        'height' : 50,
+        'width' : 320,
+        'params' : {}
+      };
+    </script>
+    <script type='text/javascript' src='//www.highperformanceformat.com/40481fbfeb3ccbe3f4d81eba78ba36e8/invoke.js'></script>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-icon">📸</div>
+  <h1>Instagram <span>Caption Generator</span></h1>
+  <p>Viral-ready captions with hashtags, emojis & CTAs — no AI key needed, 100% free</p>
+</div>
+
+<div class="container">
+
+  <!-- SETTINGS CARD -->
+  <div class="card">
+    <div class="card-title">Post Details</div>
+
+    <div class="field">
+      <label>Describe your post / photo <span class="sublabel">(required)</span></label>
+      <textarea id="postDesc" rows="4" maxlength="500" placeholder="E.g. Sunset at Goa beach with friends, wearing a yellow dress, feeling happy and free..."></textarea>
+      <div class="char-count"><span id="descCount">0</span>/500</div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label>Niche / Category</label>
+        <select id="niche">
+          <option value="lifestyle">🌿 Lifestyle</option>
+          <option value="travel">✈️ Travel</option>
+          <option value="fashion">👗 Fashion & Style</option>
+          <option value="food">🍕 Food & Recipes</option>
+          <option value="fitness">💪 Fitness & Gym</option>
+          <option value="beauty">💄 Beauty & Makeup</option>
+          <option value="tech">💻 Tech & Gadgets</option>
+          <option value="business">💼 Business & Entrepreneurship</option>
+          <option value="motivation">🔥 Motivation & Mindset</option>
+          <option value="nature">🌲 Nature & Adventure</option>
+          <option value="art">🎨 Art & Creativity</option>
+          <option value="music">🎵 Music</option>
+          <option value="pets">🐾 Pets & Animals</option>
+          <option value="parenting">👶 Parenting & Family</option>
+          <option value="spiritual">🙏 Spiritual & Mindfulness</option>
+          <option value="sports">⚽ Sports</option>
+          <option value="education">📚 Education</option>
+          <option value="memes">😂 Humor & Memes</option>
+          <option value="wedding">💍 Wedding & Events</option>
+          <option value="realestate">🏠 Real Estate</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Caption Tone</label>
+        <select id="tone">
+          <option value="fun">😄 Fun & Playful</option>
+          <option value="inspirational">✨ Inspirational</option>
+          <option value="romantic">❤️ Romantic</option>
+          <option value="sassy">💅 Sassy & Bold</option>
+          <option value="professional">🎯 Professional</option>
+          <option value="emotional">🥺 Emotional</option>
+          <option value="humorous">😂 Humorous</option>
+          <option value="minimal">🤍 Minimal & Clean</option>
+          <option value="poetic">🌸 Poetic</option>
+          <option value="savage">🔥 Savage</option>
+          <option value="relatable">🙈 Relatable</option>
+          <option value="aesthetic">🌙 Aesthetic & Moody</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid-3">
+      <div class="field">
+        <label>Caption Length</label>
+        <select id="length">
+          <option value="short">Short (1-2 lines)</option>
+          <option value="medium" selected>Medium (3-5 lines)</option>
+          <option value="long">Long (6+ lines)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Language Style</label>
+        <select id="langStyle">
+          <option value="english">English</option>
+          <option value="hinglish">Hinglish 🇮🇳</option>
+          <option value="hindi">Hindi</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Number of Captions</label>
+        <select id="captionCount">
+          <option value="3">3 Captions</option>
+          <option value="5" selected>5 Captions</option>
+          <option value="8">8 Captions</option>
+          <option value="10">10 Captions</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Caption Style</label>
+      <div class="chips-wrap" id="styleChips">
+        <div class="chip active" data-val="trending">🔥 Trending</div>
+        <div class="chip" data-val="viral">📈 Viral Hook</div>
+        <div class="chip" data-val="storytelling">📖 Storytelling</div>
+        <div class="chip" data-val="question">❓ Question CTA</div>
+        <div class="chip" data-val="quote">💬 Quote Style</div>
+        <div class="chip" data-val="hashtag_heavy">🏷️ Hashtag Heavy</div>
+        <div class="chip" data-val="emoji_rich">🎨 Emoji Rich</div>
+        <div class="chip" data-val="nostalgia">🌅 Nostalgic</div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Include Features</label>
+      <div class="chips-wrap" id="featureChips">
+        <div class="chip active" data-val="hashtags">🏷️ Hashtags</div>
+        <div class="chip active" data-val="emojis">😍 Emojis</div>
+        <div class="chip active" data-val="cta">📢 Call to Action</div>
+        <div class="chip" data-val="location">📍 Location Tag</div>
+        <div class="chip" data-val="collab">🤝 Collab Tag</div>
+        <div class="chip" data-val="quote_opener">✨ Quote Opener</div>
+        <div class="chip" data-val="line_breaks">↩️ Line Breaks</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label>Hashtag Count <span id="hashVal">25</span></label>
+        <input type="range" id="hashCount" min="5" max="30" value="25" step="5">
+        <div class="range-labels"><span>5</span><span>15</span><span>30</span></div>
+      </div>
+      <div class="field">
+        <label>Your Name / Brand <span class="sublabel">(optional)</span></label>
+        <input type="text" id="brandName" placeholder="e.g. @yourusername or Brand">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Add Custom Emojis to Mix</label>
+      <div class="emoji-strip" id="emojiStrip">
+        <div class="emoji-btn">🌸</div><div class="emoji-btn">✨</div><div class="emoji-btn">🔥</div>
+        <div class="emoji-btn">💫</div><div class="emoji-btn">🌙</div><div class="emoji-btn">❤️</div>
+        <div class="emoji-btn">🙌</div><div class="emoji-btn">💎</div><div class="emoji-btn">🌊</div>
+        <div class="emoji-btn">🎯</div><div class="emoji-btn">🦋</div><div class="emoji-btn">🌺</div>
+        <div class="emoji-btn">💪</div><div class="emoji-btn">🎉</div><div class="emoji-btn">🌍</div>
+        <div class="emoji-btn">👑</div><div class="emoji-btn">🤍</div><div class="emoji-btn">🍀</div>
+        <div class="emoji-btn">⚡</div><div class="emoji-btn">🎨</div>
+      </div>
+      <div style="font-size:0.7rem;color:var(--muted);margin-top:6px">Click to add to your caption mix</div>
+    </div>
+
+    <div class="field">
+      <label>Specific Hashtags to Include <span class="sublabel">(optional)</span></label>
+      <input type="text" id="customHashtags" placeholder="e.g. #techpatraa #india #viral (comma separated)">
+    </div>
+
+    <button class="btn-generate" id="generateBtn" onclick="generateCaptions()">
+      <span>✨</span> Generate Instagram Captions
+    </button>
+  </div>
+
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text" id="loaderText">Crafting viral captions for you...</div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results-section">
+    <div class="card">
+      <div class="results-header">
+        <div>
+          <div class="results-title">📋 Your Captions</div>
+          <div class="results-meta" id="resultsMeta"></div>
+        </div>
+        <button class="btn-sm" onclick="copyAllCaptions()">📋 Copy All</button>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-bar" id="statsBar"></div>
+    </div>
+
+    <div id="captionsList"></div>
+
+    <!-- MID AD -->
+    <div class="ad-wrap" style="margin: 10px 0;">
+      <div>
+        <div class="ad-label">Advertisement</div>
+        <!-- effectivecpmnetwork Ad -->
+        <script async src="https://cdn.effectivecpmnetwork.com/tags.min.js" data-zone="d6326e2bc11513c8d9ebfbc2f5913f5f"></script>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💡 Instagram Tips</div>
+      <div id="tipContent" class="tip-box"></div>
+    </div>
+
+    <div style="text-align:center; margin: 16px 0;">
+      <button class="btn-generate" style="max-width:300px;" onclick="generateCaptions()">🔄 Regenerate Captions</button>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="card" id="historyCard" style="display:none">
+    <div class="card-title">🕐 Recent Generations</div>
+    <div id="historyList"></div>
+    <button class="btn-sm" onclick="clearHistory()" style="margin-top:4px">🗑️ Clear History</button>
+  </div>
+
+  <!-- HOW TO USE -->
+  <div class="card">
+    <div class="card-title">📖 How to Use</div>
+    <div style="display:grid;gap:12px;">
+      <div class="tip-box">
+        <strong>Step 1 — Describe:</strong> Write what your post/photo is about. More detail = better captions.
+      </div>
+      <div class="tip-box">
+        <strong>Step 2 — Customize:</strong> Choose niche, tone, style and language that matches your vibe.
+      </div>
+      <div class="tip-box">
+        <strong>Step 3 — Generate:</strong> Click generate and get 5-10 ready-to-post captions with hashtags.
+      </div>
+      <div class="tip-box">
+        <strong>Step 4 — Copy & Post:</strong> Copy your favourite caption directly to Instagram!
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- BOTTOM AD -->
+<div class="ad-wrap" style="margin-top: 20px;">
+  <div>
+    <div class="ad-label">Advertisement</div>
+    <script type='text/javascript'>
+      atOptions = {
+        'key' : '40481fbfeb3ccbe3f4d81eba78ba36e8',
+        'format' : 'iframe',
+        'height' : 50,
+        'width' : 320,
+        'params' : {}
+      };
+    </script>
+    <script type='text/javascript' src='//www.highperformanceformat.com/40481fbfeb3ccbe3f4d81eba78ba36e8/invoke.js'></script>
+  </div>
+</div>
+
+<div class="tp-footer">
+  Made with ❤️ by <a href="https://www.techpatraa.com" target="_blank">TechPatraa</a> · Free Tools for Creators
+</div>
+
+<script>
+// ── DATA BANK ──────────────────────────────────────────────────────────────────
+
+const HASHTAG_BANK = {
+  lifestyle: ["#lifestyle","#lifestyleblogger","#dailylife","#living","#lifeisbeautiful","#vibes","#goodvibes","#liveauthentic","#authenticlife","#lifequotes","#lifestylegoals","#wellbeing","#selflove","#selfcare","#morningroutine","#eveningroutine","#cozy","#cozyhome","#slowliving","#mindset","#positivevibes","#positivity","#gratitude","#gratiutude","#blessed","#simplyliving","#liveyourlife","#everyday","#happylife","#contentcreator"],
+  travel: ["#travel","#travelgram","#travelphotography","#wanderlust","#traveltheworld","#explore","#adventure","#travelblogger","#instatravel","#vacation","#holiday","#traveller","#travellife","#backpacking","#naturephotography","#landscape","#roamtheplanet","#beautifuldestinations","#earthpix","#lonelyplanet","#traveladdict","#getaway","#travelnow","#traveltips","#visitindia","#incredibleindia","#traveldiaries","#solotravel","#coupletravel","#roadtrip"],
+  fashion: ["#fashion","#style","#ootd","#outfitoftheday","#fashionblogger","#styleinspo","#fashionstyle","#instafashion","#lookbook","#fashionpost","#outfitpost","#fashionista","#stylegoals","#wardrobegoals","#wiwt","#streetstyle","#casualstyle","#fashionweek","#styling","#outfitinspiration","#ethnic","#saree","#kurta","#indianfashion","#ethnicwear","#desi","#fashionlover","#clothes","#trendy","#slay"],
+  food: ["#food","#foodie","#instafood","#foodphotography","#foodblogger","#yummy","#delicious","#homemade","#cooking","#recipe","#foodlovers","#foodpost","#tasty","#foodgasm","#eat","#hungry","#foodstagram","#healthyfood","#indianfood","#streetfood","#dessert","#baking","#chef","#kitchen","#mealprep","#lunchtime","#dinner","#breakfast","#snacks","#vegetarian"],
+  fitness: ["#fitness","#gym","#workout","#fitlife","#fitnessmotivation","#fitspo","#gymlife","#health","#healthy","#exercise","#training","#bodybuilding","#fitfam","#gains","#muscle","#strength","#cardio","#yoga","#wellness","#motivation","#healthylifestyle","#fitnessjourney","#gymrat","#sweat","#nopainnogain","#hustle","#lift","#athlete","#workoutmotivation","#personaltrainer"],
+  beauty: ["#beauty","#makeup","#makeuptutorial","#makeupartist","#beautyblogger","#skincare","#glam","#cosmetics","#lipstick","#eyeshadow","#foundation","#contour","#highlight","#skincareroutine","#flawless","#mua","#beautytips","#glowing","#natural","#organicskincare","#selfcare","#brows","#lashes","#nails","#nailart","#beautyproducts","#affordablemakeup","#desi","#indianbeauty","#glowup"],
+  tech: ["#tech","#technology","#gadgets","#innovation","#coding","#programming","#developer","#software","#hardware","#startup","#ai","#machinelearning","#artificialintelligence","#digitalmarketing","#socialmedia","#blogger","#content","#contentcreator","#techblogger","#techtips","#smartphone","#laptop","#cybersecurity","#cloud","#data","#automation","#futureoftech","#techlover","#geek","#nerd"],
+  motivation: ["#motivation","#inspiration","#motivationalquotes","#success","#mindset","#hustle","#goals","#dream","#believe","#positivity","#grind","#nevergiveup","#entrepreneur","#leadership","#focus","#growth","#mindsetshift","#successmindset","#dailymotivation","#inspirationalquotes","#selfimprovement","#levelup","#winning","#ambition","#hardwork","#dedication","#blessed","#grateful","#possible","#youcan"],
+  nature: ["#nature","#naturephotography","#naturelover","#wildlife","#outdoors","#explore","#hiking","#mountains","#forest","#sunset","#sunrise","#sky","#clouds","#ocean","#beach","#river","#flowers","#trees","#green","#earthday","#environmental","#photooftheday","#landscapephotography","#travel","#adventure","#getoutside","#nikon","#canon","#photography","#naturewalk"],
+  art: ["#art","#artist","#artwork","#drawing","#painting","#sketch","#illustration","#digitalart","#creative","#design","#artoftheday","#artgallery","#abstract","#watercolor","#acrylic","#oilpainting","#contemporaryart","#artstudio","#artlovers","#handmade","#craft","#diy","#creativity","#inspired","#visualart","#modernart","#fineart","#artistsoninstagram","#artcommunity","#instaart"],
+  business: ["#business","#entrepreneur","#marketing","#branding","#startup","#smallbusiness","#businessowner","#success","#hustle","#money","#investment","#finance","#digitalmarketing","#socialmediamarketing","#ecommerce","#leadership","#workhard","#goals","#growthmindset","#motivation","#networking","#sidehustle","#freelance","#businesstips","#contentmarketing","#seo","#brand","#mindset","#passive","#wealth"],
+  music: ["#music","#musician","#singer","#song","#hiphop","#rap","#indie","#pop","#rock","#rnb","#beats","#producer","#guitar","#piano","#drums","#livemusic","#concert","#newmusic","#musicproducer","#recordingstudio","#vocals","#original","#cover","#playlist","#musiclover","#melody","#rhythm","#vibe","#soundcloud","#spotify"],
+  pets: ["#pets","#dog","#cat","#puppy","#kitten","#petsofinstagram","#dogsofinstagram","#catsofinstagram","#animallover","#petlover","#cuteanimals","#petlife","#furryfriend","#dogmom","#catmom","#rescue","#adoptdontshop","#doglover","#catlover","#animallovers","#petphotography","#adorable","#cute","#instadog","#instacat","#petsofinsta","#doglife","#catlife","#pup","#kitten"],
+  spiritual: ["#spiritual","#spirituality","#meditation","#mindfulness","#yoga","#peace","#soul","#divine","#universe","#manifestation","#gratitude","#blessed","#healing","#chakra","#energy","#enlightenment","#consciousness","#awareness","#innerpeace","#positive","#namaste","#zen","#faith","#believe","#prayer","#god","#universe","#highervibrations","#lawofattraction","#selflove"],
+  wedding: ["#wedding","#bride","#bridal","#weddingday","#weddingphoto","#weddingphotography","#indianwedding","#hinduwedding","#nikkah","#shaadi","#brides","#bridesmaids","#weddingdress","#lehenga","#saree","#groom","#weddingdecor","#flowers","#love","#forever","#justmarried","#reception","#sangeet","#mehendi","#weddingplanner","#weddinggoals","#couplegoals","#prewedding","#engagement","#weddingseason"],
+  memes: ["#funny","#memes","#humor","#lol","#comedy","#relatable","#jokes","#trending","#viral","#reels","#reelsindia","#funnyvideos","#haha","#laughing","#mood","#sarcasm","#desi","#indianmemes","#funnymemes","#dailymemes","#memesdaily","#fyp","#foryou","#trending","#share","#funnypost","#comedy","#entertainment","#banter","#pun"],
+  sports: ["#sports","#fitness","#athlete","#training","#cricket","#football","#basketball","#running","#cycling","#swimming","#game","#match","#champion","#win","#teamwork","#sportslife","#sportsman","#sportsmanship","#compete","#hustle","#dedication","#strength","#motivation","#workout","#gym","#performance","#health","#active","#sportslovers","#india"],
+  education: ["#education","#learning","#student","#study","#college","#university","#school","#knowledge","#teacher","#classroom","#edtech","#elearning","#onlinelearning","#studygram","#studymotivation","#bookstagram","#reading","#books","#library","#academic","#exam","#notes","#skills","#growth","#selfdevelopment","#future","#career","#success","#studytips","#learneveryday"],
+  parenting: ["#parenting","#mom","#dad","#baby","#kids","#family","#children","#toddler","#newborn","#motherhood","#fatherhood","#parentlife","#familytime","#childhood","#babygirl","#babyboy","#momlife","#dadlife","#parentingquotes","#love","#family","#cute","#adorable","#babies","#babyshower","#pregnancy","#newmom","#kidsofinstagram","#littleones","#familygoals"],
+  realestate: ["#realestate","#property","#home","#house","#investment","#mortgage","#realtor","#housing","#realty","#homebuying","#homeselling","#interiordesign","#homedecor","#architecture","#construction","#luxury","#apartment","#villa","#plot","#land","#dreamhome","#newhome","#househunting","#propertyforsale","#realestateindia","#builderfloor","#gated","#township","#propertyinvestment","#realtorlife"]
+};
+
+const VIRAL_HOOKS = {
+  fun: ["POV: When life gives you {topic} 🌟", "Nobody asked but here I am serving {topic} vibes ✨", "The plot twist nobody saw coming 👀", "Main character energy loading... ✨"],
+  inspirational: ["This is your sign to start 🌟", "One year from now you'll wish you started today 💫", "Glow up is not just physical ✨", "Your story is still being written 📖"],
+  romantic: ["Some moments are just too good to keep to myself 💕", "Plot twist: I chose happiness 🌹", "Love is in the details 💌", "This one's for the soul ❤️"],
+  sassy: ["Not me serving looks again 💅", "I woke up like this. Okay I didn't but still 😌", "The confidence? Self-gifted 👑", "Outfit said everything I couldn't 🔥"],
+  professional: ["Consistency beats perfection every time 🎯", "Behind every great moment is preparation 💼", "Results speak louder 📊", "Show up. Level up. 🏆"],
+  emotional: ["Some days just hit different 🌧️", "This moment lives in my heart forever 💙", "Feeling everything at once 🫂", "Grateful for the journey 🙏"],
+  humorous: ["My camera roll: 90% food, 10% me pretending to be photogenic 😂", "Local girl tries to be aesthetic. Results: mixed 🙈", "Plot: I went outside. Character development? Unclear 😅"],
+  minimal: ["Here. 🤍", "Just this.", "Nothing more. Nothing less. ✨", "The details matter 🌿"],
+  poetic: ["In the space between moments, magic lives 🌙", "Some things are better felt than explained 🌸", "The stars aligned for this one 💫", "Beauty finds those who look closely 🌺"],
+  savage: ["They counted me out. I counted up 💪", "Unbothered. Moisturised. Winning. 🔥", "My patience with BS expired 😤", "Glow different, think different 👑"],
+  relatable: ["Tell me I'm not the only one 🙋", "Every. Single. Time. 😭", "Why is this so accurate 😂", "Who else can relate? 👇"],
+  aesthetic: ["Lost in my own world 🌙", "Soft life era has entered the chat 🌸", "The vibe was immaculate ✨", "Chasing light and good moments 🌅"]
+};
+
+const CTAS = [
+  "Drop a 🔥 if you agree!", "Save this for later! 💾", "Tag someone who needs to see this! 👇",
+  "Double tap if you can relate! ❤️", "Share your thoughts in the comments! 💬",
+  "Follow for more content like this! ✨", "Which one are you? Let me know! 👇",
+  "Link in bio! 🔗", "Turn on notifications so you don't miss out! 🔔",
+  "Comment your vibe below! 💬", "Pin this! 📌", "Who else vibes with this? Tag them! 👇"
+];
+
+const TIPS = {
+  lifestyle: "<strong>Pro Tip:</strong> Lifestyle posts with authentic behind-the-scenes content get 3× more saves. Post between 6-9 PM IST on weekdays for maximum reach.",
+  travel: "<strong>Travel Hack:</strong> Use location-specific hashtags (city + country) alongside general ones. Add a question in your caption to boost comments by 70%.",
+  fashion: "<strong>Style Secret:</strong> OOTD posts with direct shopping links in bio get 25% more profile visits. Post on Monday & Thursday for fashion audiences.",
+  food: "<strong>Food Photography Tip:</strong> Top-down shots with natural light perform best. Use the word 'recipe' in your caption — it increases saves massively.",
+  fitness: "<strong>Fitness Growth:</strong> Transformation posts & 'before/after' content get 5× more shares. Post at 6 AM or 5-7 PM when your followers are most active.",
+  motivation: "<strong>Engagement Boost:</strong> End motivational posts with a question. 'Agree or disagree?' type captions see 40% higher comment rates.",
+  beauty: "<strong>Beauty Creator Tip:</strong> Tutorial Reels get shared 8× more than static posts. Always mention the products used — it drives affiliate clicks.",
+  default: "<strong>Instagram Algorithm Tip:</strong> Post consistently at the same time daily. Captions with 5-10 hashtags in comments (not caption) avoid shadow-banning. Engage with followers in the first 30 minutes of posting — it signals the algorithm!"
+};
+
+const HINGLISH_PHRASES = ["Kya scene hai", "Life is beautiful yaar", "Aur kya chahiye", "Bas yahi toh chahiye tha", "Full on mazaa", "Feeling blessed hai bhai", "Jo hoga dekha jayega", "Chill maar yaar", "Kuch toh log kahenge", "Apni marzi se jeete hain", "Sab theek ho jayega", "Life mein bas yahi chahiye", "Ekdum mast moment", "Yaar zindagi ek baar milti hai"];
+
+const HINDI_PHRASES = ["जिंदगी खूबसूरत है", "बस यही चाहिए था", "आनंद लो इस पल का", "खुशियाँ बाँटो", "हर पल को जियो", "यादें अनमोल होती हैं", "दिल से जियो", "जो है वो काफी है", "मुस्कुराते रहो", "सफर जारी है"];
+
+// ── SELECTED EMOJIS ─────────────────────────────────────────────────────────────
+let selectedEmojis = [];
+let selectedStyles = ['trending'];
+let selectedFeatures = ['hashtags', 'emojis', 'cta'];
+let history = JSON.parse(localStorage.getItem('ig_caption_history') || '[]');
+
+// ── INIT ────────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Char counter
+  const desc = document.getElementById('postDesc');
+  desc.addEventListener('input', () => {
+    document.getElementById('descCount').textContent = desc.value.length;
+  });
+
+  // Hash slider
+  const hashSlider = document.getElementById('hashCount');
+  hashSlider.addEventListener('input', () => {
+    document.getElementById('hashVal').textContent = hashSlider.value;
+  });
+
+  // Style chips
+  document.getElementById('styleChips').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    chip.classList.toggle('active');
+    const val = chip.dataset.val;
+    if (chip.classList.contains('active')) {
+      selectedStyles.push(val);
+    } else {
+      selectedStyles = selectedStyles.filter(s => s !== val);
+    }
+  });
+
+  // Feature chips
+  document.getElementById('featureChips').addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    chip.classList.toggle('active');
+    const val = chip.dataset.val;
+    if (chip.classList.contains('active')) {
+      selectedFeatures.push(val);
+    } else {
+      selectedFeatures = selectedFeatures.filter(f => f !== val);
+    }
+  });
+
+  // Emoji buttons
+  document.getElementById('emojiStrip').addEventListener('click', e => {
+    const btn = e.target.closest('.emoji-btn');
+    if (!btn) return;
+    const emoji = btn.textContent;
+    if (!selectedEmojis.includes(emoji)) {
+      selectedEmojis.push(emoji);
+      btn.style.background = 'rgba(29,158,117,0.3)';
+      btn.style.borderColor = 'var(--green)';
+    } else {
+      selectedEmojis = selectedEmojis.filter(e => e !== emoji);
+      btn.style.background = '';
+      btn.style.borderColor = '';
+    }
+  });
+
+  renderHistory();
+});
+
+// ── CAPTION GENERATION ENGINE ────────────────────────────────────────────────────
+
+function pickRandom(arr, n = 1) {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return n === 1 ? shuffled[0] : shuffled.slice(0, n);
+}
+
+function getHashtags(niche, count, custom) {
+  const pool = HASHTAG_BANK[niche] || HASHTAG_BANK.lifestyle;
+  const general = ["#instagram","#instagood","#instadaily","#photooftheday","#picoftheday","#trending","#viral","#explore","#reels","#fyp"];
+  const combined = [...new Set([...pool, ...general])];
+  const picked = pickRandom(combined, Math.min(count, combined.length));
+  if (custom) {
+    const customTags = custom.split(',').map(t => t.trim()).filter(t => t.startsWith('#'));
+    return [...new Set([...customTags, ...picked])].slice(0, count);
+  }
+  return picked;
+}
+
+function buildCaption(params) {
+  const { desc, niche, tone, length, langStyle, style, features, brand, hashCount, customHashtags } = params;
+
+  let lines = [];
+  const includeEmoji = features.includes('emojis');
+  const includeCTA = features.includes('cta');
+  const includeLineBreaks = features.includes('line_breaks');
+  const includeLocation = features.includes('location');
+  const includeCollab = features.includes('collab');
+  const includeQuoteOpener = features.includes('quote_opener');
+
+  // Get topic keywords from description
+  const words = desc.split(' ').filter(w => w.length > 3);
+  const topic = words.slice(0, 3).join(' ') || niche;
+
+  // Style templates
+  const styleMap = {
+    trending: () => buildTrending(tone, topic, desc, includeEmoji, langStyle),
+    viral: () => buildViral(tone, topic, desc, includeEmoji, langStyle),
+    storytelling: () => buildStorytelling(tone, topic, desc, includeEmoji, langStyle),
+    question: () => buildQuestion(tone, topic, desc, includeEmoji, langStyle),
+    quote: () => buildQuote(tone, topic, desc, includeEmoji, langStyle),
+    hashtag_heavy: () => buildHashtagHeavy(tone, topic, desc, includeEmoji, langStyle),
+    emoji_rich: () => buildEmojiRich(tone, topic, desc, langStyle),
+    nostalgia: () => buildNostalgia(tone, topic, desc, includeEmoji, langStyle),
+  };
+
+  const selectedStyle = style || 'trending';
+  const bodyFn = styleMap[selectedStyle] || styleMap.trending;
+  let body = bodyFn();
+
+  // Length control
+  const sentences = body.split('. ').filter(Boolean);
+  if (length === 'short') body = sentences.slice(0, 2).join('. ');
+  else if (length === 'medium') body = sentences.slice(0, 5).join('. ');
+  // long = full
+
+  // Extra features
+  if (includeQuoteOpener) {
+    const quotes = [
+      '"Life is a journey, not a destination." ✨\n\n',
+      '"Be yourself; everyone else is already taken." 🌟\n\n',
+      '"The best time for new beginnings is now." 💫\n\n',
+      '"In the middle of difficulty lies opportunity." 🔥\n\n'
+    ];
+    body = pickRandom(quotes) + body;
+  }
+
+  if (includeLineBreaks) {
+    body = body.replace(/\. /g, '.\n\n');
+  }
+
+  if (includeLocation) {
+    body += '\n\n📍 Location ↓ (tag your location!)';
+  }
+
+  if (includeCollab) {
+    body += '\n\n🤝 With: @collab_username';
+  }
+
+  if (includeCTA) {
+    body += '\n\n' + pickRandom(CTAS);
+  }
+
+  if (brand) {
+    const brandTag = brand.startsWith('@') ? brand : `@${brand}`;
+    body += `\n\n${brandTag}`;
+  }
+
+  // Language adjustments
+  if (langStyle === 'hinglish') {
+    body += '\n\n' + pickRandom(HINGLISH_PHRASES) + ' 🙌';
+  } else if (langStyle === 'hindi') {
+    body += '\n\n' + pickRandom(HINDI_PHRASES) + ' 🙏';
+  }
+
+  // Hashtags
+  let hashtagLine = '';
+  if (features.includes('hashtags')) {
+    const tags = getHashtags(niche, parseInt(hashCount), customHashtags);
+    hashtagLine = tags.join(' ');
+  }
+
+  return { body: body.trim(), hashtags: hashtagLine };
+}
+
+// ── STYLE BUILDERS ────────────────────────────────────────────────────────────────
+
+function addEmojis(text, emojis) {
+  if (!emojis || emojis.length === 0) return text;
+  return text + ' ' + pickRandom(emojis, Math.min(3, emojis.length)).join('');
+}
+
+const TONE_EMOJIS = {
+  fun: ['😄','🎉','✨','🌟','🔥','💃','🎊'],
+  inspirational: ['✨','💫','🌟','🙌','💪','🌈','🌸'],
+  romantic: ['❤️','💕','🌹','💌','🥰','💑','🌺'],
+  sassy: ['💅','👑','🔥','💎','😏','✨','🦋'],
+  professional: ['🎯','💼','📊','🏆','✅','🔑','💡'],
+  emotional: ['🥺','💙','🌧️','🫂','💔','🌊','💭'],
+  humorous: ['😂','🙈','😅','🤣','💀','😭','🤦'],
+  minimal: ['🤍','🌿','✦','·','🫶'],
+  poetic: ['🌙','🌸','💫','🌺','🌊','🕊️','⭐'],
+  savage: ['🔥','💪','👊','😤','💯','⚡','👑'],
+  relatable: ['🙋','😭','💀','🙈','😂','😩','🤦'],
+  aesthetic: ['🌙','✨','🌸','🌿','🎞️','🌅','💧']
+};
+
+function e(tone) { return pickRandom(TONE_EMOJIS[tone] || TONE_EMOJIS.fun); }
+
+function buildTrending(tone, topic, desc, useEmoji, lang) {
+  const hook = pickRandom(VIRAL_HOOKS[tone] || VIRAL_HOOKS.fun).replace('{topic}', topic);
+  const emo = useEmoji ? ` ${e(tone)}` : '';
+  const lines = [
+    hook,
+    `${desc.length > 50 ? desc.substring(0, 80) + '...' : desc}${emo}`,
+    `This is the kind of moment that reminds you what life is really about.${useEmoji ? ' 🌟' : ''}`,
+    `Not every day looks like this, but every day is a step towards it.${useEmoji ? ' 💫' : ''}`
+  ];
+  return lines.join('\n\n');
+}
+
+function buildViral(tone, topic, desc, useEmoji, lang) {
+  const emo = useEmoji ? ` ${e(tone)}` : '';
+  return [
+    `Stop scrolling for a second.${useEmoji ? ' 🛑' : ''}`,
+    `${desc.substring(0, 100)}${desc.length > 100 ? '...' : ''}${emo}`,
+    `The thing about moments like this? They don't come twice.${useEmoji ? ' ⏳' : ''}`,
+    `Are you living your best life right now? Because this is mine.${useEmoji ? ' 🌟' : ''}`
+  ].join('\n\n');
+}
+
+function buildStorytelling(tone, topic, desc, useEmoji, lang) {
+  const emo = useEmoji ? ` ${e(tone)}` : '';
+  return [
+    `Let me tell you a little story.${useEmoji ? ' 📖' : ''}`,
+    `It started with ${desc.substring(0, 60)}...${emo}`,
+    `And somewhere in the middle, I remembered why I love this so much.`,
+    `The best chapters in life are the ones you never planned.${useEmoji ? ' ✨' : ''}`
+  ].join('\n\n');
+}
+
+function buildQuestion(tone, topic, desc, useEmoji, lang) {
+  const questions = [
+    `What does ${topic} mean to you?`,
+    `Have you ever felt this way?`,
+    `When was the last time you did something for the first time?`,
+    `What's your favourite way to experience this?`
+  ];
+  const emo = useEmoji ? ` ${e(tone)}` : '';
+  return [
+    pickRandom(questions) + (useEmoji ? ' 👇' : ''),
+    `${desc.substring(0, 80)}${emo}`,
+    `I'd love to hear your thoughts in the comments below.${useEmoji ? ' 💬' : ''}`
+  ].join('\n\n');
+}
+
+function buildQuote(tone, topic, desc, useEmoji, lang) {
+  const quotes = [
+    `"The secret of happiness is not in doing what one likes, but in liking what one does."`,
+    `"Life begins at the end of your comfort zone."`,
+    `"Not all those who wander are lost."`,
+    `"The journey of a thousand miles begins with a single step."`,
+    `"Wherever you go, go with all your heart."`,
+    `"Every day is a new beginning."`,
+    `"Life is short, make it sweet."`
+  ];
+  const emo = useEmoji ? ` ${e(tone)}` : '';
+  return [
+    `${pickRandom(quotes)}${emo}`,
+    `${desc.substring(0, 80)}`,
+    `Some things just hit differently when you're living them.${useEmoji ? ' 💭' : ''}`
+  ].join('\n\n');
+}
+
+function buildHashtagHeavy(tone, topic, desc, useEmoji, lang) {
+  const emo = useEmoji ? ` ${e(tone)}` : '';
+  return [
+    `${desc.substring(0, 120)}${emo}`,
+    `Living for these moments.${useEmoji ? ' ✨' : ''}`
+  ].join('\n\n');
+}
+
+function buildEmojiRich(tone, topic, desc, lang) {
+  const emoPool = TONE_EMOJIS[tone] || TONE_EMOJIS.fun;
+  const words = desc.split(' ');
+  const emoText = words.map((w, i) => i % 3 === 2 ? w + ' ' + pickRandom(emoPool) : w).join(' ');
+  return `${emoText}\n\nLiving this moment to the fullest ${pickRandom(emoPool)} ${pickRandom(emoPool)} ${pickRandom(emoPool)}`;
+}
+
+function buildNostalgia(tone, topic, desc, useEmoji, lang) {
+  const emo = useEmoji ? ` ${e(tone)}` : '';
+  return [
+    `One day you'll look back on this and smile.${useEmoji ? ' 🌅' : ''}`,
+    `${desc.substring(0, 80)}${emo}`,
+    `These are the moments we collect without even knowing it.`,
+    `Hold on to what makes you feel alive.${useEmoji ? ' 💛' : ''}`
+  ].join('\n\n');
+}
+
+// ── BADGE ─────────────────────────────────────────────────────────────────────────
+
+function getBadge(i) {
+  const badges = [
+    { label: '🔥 Trending', cls: 'badge-trending' },
+    { label: '📈 Viral', cls: 'badge-viral' },
+    { label: '📖 Story', cls: 'badge-story' },
+    { label: '🎯 Pro', cls: 'badge-professional' },
+    { label: '🤍 Minimal', cls: 'badge-minimal' },
+    { label: '💛 Emotional', cls: 'badge-emotional' },
+    { label: '✨ Aesthetic', cls: 'badge-professional' },
+    { label: '🔮 Unique', cls: 'badge-viral' },
+    { label: '🌟 Premium', cls: 'badge-trending' },
+    { label: '💫 Star', cls: 'badge-story' },
+  ];
+  return badges[i % badges.length];
+}
+
+// ── MAIN GENERATE ────────────────────────────────────────────────────────────────
+
+function generateCaptions() {
+  const desc = document.getElementById('postDesc').value.trim();
+  if (!desc) {
+    alert('Please describe your post first! 📸');
+    return;
+  }
+
+  const niche = document.getElementById('niche').value;
+  const tone = document.getElementById('tone').value;
+  const length = document.getElementById('length').value;
+  const langStyle = document.getElementById('langStyle').value;
+  const captionCount = parseInt(document.getElementById('captionCount').value);
+  const hashCount = document.getElementById('hashCount').value;
+  const brand = document.getElementById('brandName').value.trim();
+  const customHashtags = document.getElementById('customHashtags').value.trim();
+
+  const styles = selectedStyles.length ? selectedStyles : ['trending', 'viral', 'storytelling', 'quote', 'emotional'];
+  const features = selectedFeatures;
+
+  // Show loader
+  document.getElementById('loader').classList.add('active');
+  document.getElementById('results-section').style.display = 'none';
+  document.getElementById('generateBtn').disabled = true;
+
+  const loaderMsgs = ['Crafting viral captions...', 'Adding the perfect emojis...', 'Picking trending hashtags...', 'Polishing your captions ✨'];
+  let mi = 0;
+  const loaderInterval = setInterval(() => {
+    document.getElementById('loaderText').textContent = loaderMsgs[mi++ % loaderMsgs.length];
+  }, 600);
+
+  setTimeout(() => {
+    clearInterval(loaderInterval);
+    document.getElementById('loader').classList.remove('active');
+    document.getElementById('generateBtn').disabled = false;
+
+    const captions = [];
+    for (let i = 0; i < captionCount; i++) {
+      const style = styles[i % styles.length];
+      const result = buildCaption({ desc, niche, tone, length, langStyle, style, features, brand, hashCount, customHashtags });
+      captions.push({ ...result, style });
+    }
+
+    renderResults(captions, niche, tone);
+
+    // Save to history
+    const historyItem = {
+      preview: captions[0].body.substring(0, 60) + '...',
+      time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+      captions
+    };
+    history.unshift(historyItem);
+    if (history.length > 10) history.pop();
+    localStorage.setItem('ig_caption_history', JSON.stringify(history));
+    renderHistory();
+
+    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+  }, 1800);
+}
+
+function renderResults(captions, niche, tone) {
+  document.getElementById('results-section').style.display = 'block';
+
+  const totalWords = captions.reduce((s, c) => s + c.body.split(' ').length, 0);
+  const totalHash = captions.reduce((s, c) => s + (c.hashtags.match(/#/g) || []).length, 0);
+
+  document.getElementById('resultsMeta').textContent = `${captions.length} captions generated for ${niche} (${tone} tone)`;
+
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-pill"><div class="val">${captions.length}</div><div class="lbl">Captions</div></div>
+    <div class="stat-pill"><div class="val">${totalWords}</div><div class="lbl">Total Words</div></div>
+    <div class="stat-pill"><div class="val">${totalHash}</div><div class="lbl">Hashtags</div></div>
+    <div class="stat-pill"><div class="val">📈</div><div class="lbl">Viral Ready</div></div>
+  `;
+
+  const list = document.getElementById('captionsList');
+  list.innerHTML = '';
+
+  captions.forEach((cap, i) => {
+    const badge = getBadge(i);
+    const charCount = cap.body.length + (cap.hashtags ? '\n\n' + cap.hashtags : '').length;
+    const div = document.createElement('div');
+    div.className = 'caption-card';
+    div.innerHTML = `
+      <span class="caption-badge ${badge.cls}">${badge.label}</span>
+      <div class="caption-text" id="captionText${i}">${cap.body}</div>
+      ${cap.hashtags ? `<div class="hashtag-block">${cap.hashtags}</div>` : ''}
+      <div class="caption-actions">
+        <button class="btn-sm" onclick="copyCaption(${i}, false)">📋 Copy Caption</button>
+        <button class="btn-sm" onclick="copyCaption(${i}, true)">🏷️ Copy with Hashtags</button>
+        <button class="btn-sm" style="color:var(--muted);">${charCount} chars</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+
+  // Tips
+  const tip = TIPS[document.getElementById('niche').value] || TIPS.default;
+  document.getElementById('tipContent').innerHTML = tip;
+
+  // Store globally for copy all
+  window._generatedCaptions = captions;
+}
+
+function copyCaption(i, withHashtags) {
+  const cap = window._generatedCaptions[i];
+  let text = cap.body;
+  if (withHashtags && cap.hashtags) text += '\n\n' + cap.hashtags;
+  navigator.clipboard.writeText(text).then(() => {
+    const btns = document.querySelectorAll(`.caption-card:nth-child(${i + 1}) .btn-sm`);
+    if (btns[withHashtags ? 1 : 0]) {
+      const btn = btns[withHashtags ? 1 : 0];
+      const original = btn.textContent;
+      btn.textContent = '✅ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 2000);
+    }
+  });
+}
+
+function copyAllCaptions() {
+  if (!window._generatedCaptions) return;
+  const text = window._generatedCaptions.map((c, i) => `--- Caption ${i + 1} ---\n${c.body}\n\n${c.hashtags}`).join('\n\n');
+  navigator.clipboard.writeText(text).then(() => alert('All captions copied! ✅'));
+}
+
+function renderHistory() {
+  const card = document.getElementById('historyCard');
+  const list = document.getElementById('historyList');
+  if (!history.length) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  list.innerHTML = history.map((h, i) => `
+    <div class="history-item" onclick="loadHistoryItem(${i})">
+      <div class="history-preview">${h.preview}</div>
+      <div class="history-time">${h.time}</div>
+    </div>
+  `).join('');
+}
+
+function loadHistoryItem(i) {
+  renderResults(history[i].captions, '', '');
+  document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function clearHistory() {
+  history = [];
+  localStorage.removeItem('ig_caption_history');
+  renderHistory();
+}
+</script>
+
+</body>
+</html>
